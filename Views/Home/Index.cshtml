@@ -1,0 +1,30 @@
+﻿@model IEnumerable<LoadsheddingV1.Models.LoadsheddingEvent>
+
+<div class="jumbotron" style="background-color: #f0f8ff; border-radius: 20px; padding: 20px;">
+    <h2 class="display-4">Next Load Shedding Event</h2>
+    <hr class="my-4">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Area</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr style="padding-bottom: 10px;">
+                        <!-- Added padding-bottom here -->
+                        <td>@item.AreaId</td>
+                        <td>@item.StartTime</td>
+                        <td>@item.EndTime</td>
+                        <td>@item.LastUpdated</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
