@@ -1,6 +1,6 @@
 # LoadsheddingV1
 
-![.NET CI](https://github.com/<your-username>/<your-repo>/actions/workflows/dotnet-ci.yml/badge.svg)
+![.NET CI](https://github.com/hendrram/LoadsheddingV1/actions/workflows/dotnet-ci.yml/badge.svg)
 
 A .NET 6 web application for tracking load-shedding schedules and lab power status updates.
 
