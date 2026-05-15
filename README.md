@@ -80,12 +80,5 @@ Configured via `appsettings.json` and user secrets:
 - Local override files are excluded via `.gitignore`.
 - For production, use environment variables or a secure secret store.
 
-## Suggested Portfolio Enhancements
-- Add screenshots/GIFs of Home and Labs pages
-- Add unit/integration tests for update logic
-- Add CI pipeline (build + test + lint)
-- Add Docker support for reproducible local setup
-- Add structured logging and health checks
-
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE).
