@@ -1,30 +1,162 @@
 ﻿@model IEnumerable<LoadsheddingV1.Models.LoadsheddingEvent>
+@{
+    ViewData["Title"] = "Dashboard";
+    var now = DateTime.Now;
+    var upcoming = Model.Where(e => e.EndTime > now).OrderBy(e => e.StartTime).ToList();
+    var active   = upcoming.Where(e => e.StartTime <= now).ToList();
+    var next     = upcoming.FirstOrDefault(e => e.StartTime > now);
+}
 
-<div class="jumbotron" style="background-color: #f0f8ff; border-radius: 20px; padding: 20px;">
-    <h2 class="display-4">Next Load Shedding Event</h2>
-    <hr class="my-4">
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-light">
-                <tr>
-                    <th>Area</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr style="padding-bottom: 10px;">
-                        <!-- Added padding-bottom here -->
-                        <td>@item.AreaId</td>
-                        <td>@item.StartTime</td>
-                        <td>@item.EndTime</td>
-                        <td>@item.LastUpdated</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<!-- Hero strip -->
+<div class="hero-strip mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <div class="subtitle mb-1">
+                <i class="bi bi-geo-alt-fill me-1"></i>Rondebosch, Cape Town
+            </div>
+            <h1 class="fw-bold mb-0" style="font-size:1.8rem;">
+                Load Shedding Dashboard
+            </h1>
+            <div class="subtitle mt-1">
+                <i class="bi bi-clock me-1"></i>Last refreshed: @now.ToString("dd MMM yyyy, HH:mm")
+            </div>
+        </div>
+        <div>
+            @if (active.Any())
+            {
+                <span class="badge bg-danger fs-6 px-3 py-2">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Outage Active
+                </span>
+            }
+            else if (next != null)
+            {
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                    <i class="bi bi-clock-history me-1"></i>Next: @next.StartTime.ToString("HH:mm")
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-success fs-6 px-3 py-2">
+                    <i class="bi bi-check-circle-fill me-1"></i>No Outages Scheduled
+                </span>
+            }
+        </div>
     </div>
 </div>
+
+<!-- Stat summary row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-red">
+                <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@upcoming.Count</div>
+                <div class="stat-label">Scheduled Events</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-amber">
+                <i class="bi bi-exclamation-circle-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@active.Count</div>
+                <div class="stat-label">Active Outages</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-blue">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div>
+                <div class="stat-value">
+                    @(next != null ? next.StartTime.ToString("HH:mm") : "--:--")
+                </div>
+                <div class="stat-label">Next Outage At</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-green">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+                <div class="stat-value">Stage 4</div>
+                <div class="stat-label">Current Stage</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming events -->
+<div class="section-title">
+    <i class="bi bi-calendar3 me-1"></i>Upcoming Outages
+</div>
+
+@if (!upcoming.Any())
+{
+    <div class="event-card p-4 text-center">
+        <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
+        <p class="mb-0 fw-semibold">No load shedding events scheduled. Enjoy the power!</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var item in upcoming)
+        {
+            var isActive = item.StartTime <= now && item.EndTime > now;
+            var duration = (item.EndTime - item.StartTime).TotalHours;
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="event-card">
+                    <div class="card-accent @(isActive ? "safe" : "")"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Area</div>
+                                <div class="fw-bold" style="font-size:1rem;">@item.AreaId</div>
+                            </div>
+                            @if (isActive)
+                            {
+                                <span class="badge-outage"><i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge-safe"><i class="bi bi-clock me-1"></i>Upcoming</span>
+                            }
+                        </div>
+                        <div class="d-flex gap-3 mb-2">
+                            <div>
+                                <div class="text-muted small">Starts</div>
+                                <div class="event-time">@item.StartTime.ToString("HH:mm")</div>
+                                <div class="event-duration">@item.StartTime.ToString("dd MMM")</div>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Ends</div>
+                                <div class="event-time">@item.EndTime.ToString("HH:mm")</div>
+                                <div class="event-duration">@item.EndTime.ToString("dd MMM")</div>
+                            </div>
+                            <div class="ms-auto text-end">
+                                <div class="text-muted small">Duration</div>
+                                <div class="event-time">@duration.ToString("0.0")h</div>
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-2" style="border-top:1px solid #f1f5f9; padding-top:.5rem;">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Updated @item.LastUpdated.ToString("dd MMM, HH:mm")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+

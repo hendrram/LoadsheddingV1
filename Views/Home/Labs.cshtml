@@ -1,62 +1,149 @@
 ﻿@model List<Labs>
+@{
+    ViewData["Title"] = "Labs";
+    var onCount  = Model.Count(l => l.OnOff);
+    var offCount = Model.Count(l => !l.OnOff);
+}
 
-<div class="jumbotron" style="background-color: #f0f8ff; border-radius: 20px; padding: 20px;">
-    <h2 class="display-4">Enable/Disable Labs</h2>
-    <hr class="my-4">
-    <form asp-action="UpdateLab">
-        <div class="row">
-            <div class="col-md-4">
-                @for (int i = 0; i < Model.Count && i < 8; i++)
-                {
-                    <div style="padding-bottom: 10px;">
-                        <!-- Added padding-bottom here -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="labs[@i].OnOff" id="labCheckbox@(i)" value="true" @(Model[i].OnOff ? "checked" : "") />
-                            <label class="form-check-label" for="labCheckbox@(i)">
-                                @Model[i].LabName
-                            </label>
-                        </div>
-                        <input type="hidden" name="labs[@i].OnOff" value="false" />
-                        <input type="hidden" name="labs[@i].LabName" value="@Model[i].LabName" />
-                    </div>
-                }
+<!-- Hero strip -->
+<div class="hero-strip mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <div class="subtitle mb-1">
+                <i class="bi bi-building me-1"></i>Computer Science Building
             </div>
-            <div class="col-md-4">
-                @for (int i = 8; i < Model.Count && i < 16; i++)
-                {
-                    <div style="padding-bottom: 10px;">
-                        <!-- Added padding-bottom here -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="labs[@i].OnOff" id="labCheckbox@(i)" value="true" @(Model[i].OnOff ? "checked" : "") />
-                            <label class="form-check-label" for="labCheckbox@(i)">
-                                @Model[i].LabName
-                            </label>
-                        </div>
-                        <input type="hidden" name="labs[@i].OnOff" value="false" />
-                        <input type="hidden" name="labs[@i].LabName" value="@Model[i].LabName" />
-                    </div>
-                }
-            </div>
-            <div class="col-md-4">
-                @for (int i = 16; i < Model.Count && i < 24; i++)
-                {
-                    <div style="padding-bottom: 10px;">
-                        <!-- Added padding-bottom here -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="labs[@i].OnOff" id="labCheckbox@(i)" value="true" @(Model[i].OnOff ? "checked" : "") />
-                            <label class="form-check-label" for="labCheckbox@(i)">
-                                @Model[i].LabName
-                            </label>
-                        </div>
-                        <input type="hidden" name="labs[@i].OnOff" value="false" />
-                        <input type="hidden" name="labs[@i].LabName" value="@Model[i].LabName" />
-                    </div>
-                }
-            </div>
+            <h1 class="fw-bold mb-0" style="font-size:1.8rem;">
+                Lab Power Management
+            </h1>
+            <div class="subtitle mt-1">Toggle labs on or off during load shedding</div>
         </div>
-
-        <div class="text-center" style="margin-top: 20px;">
-            <input class="btn btn-primary" type="submit" value="Submit">
+        <div class="d-flex gap-2">
+            <span class="badge bg-success fs-6 px-3 py-2">
+                <i class="bi bi-power me-1"></i>@onCount Online
+            </span>
+            <span class="badge bg-secondary fs-6 px-3 py-2">
+                <i class="bi bi-slash-circle me-1"></i>@offCount Offline
+            </span>
         </div>
-    </form>
+    </div>
 </div>
+
+<!-- Stat row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-blue">
+                <i class="bi bi-pc-display"></i>
+            </div>
+            <div>
+                <div class="stat-value">@Model.Count</div>
+                <div class="stat-label">Total Labs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-green">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@onCount</div>
+                <div class="stat-label">Online</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-red">
+                <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@offCount</div>
+                <div class="stat-label">Offline</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-amber">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div>
+                <div class="stat-value">@(Model.Count > 0 ? (int)Math.Round(onCount * 100.0 / Model.Count) : 0)%</div>
+                <div class="stat-label">Availability</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lab toggle grid -->
+<div class="section-title">
+    <i class="bi bi-toggles me-1"></i>Lab Status
+</div>
+
+<form asp-action="UpdateLab">
+    <div class="row g-3 mb-4">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var isOn = Model[i].OnOff;
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label class="lab-card @(isOn ? "lab-on" : "lab-off") w-100 user-select-none"
+                       for="lab_@i">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="stat-icon @(isOn ? "stat-icon-green" : "stat-icon-red")"
+                             style="width:36px;height:36px;font-size:1rem;border-radius:8px;">
+                            <i class="bi @(isOn ? "bi-pc-display" : "bi-pc-display-horizontal")"></i>
+                        </div>
+                        <div>
+                            <div class="lab-name">@Model[i].LabName</div>
+                            <div class="text-muted small">@(isOn ? "Online" : "Offline")</div>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-0 ms-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               id="lab_@i"
+                               name="labs[@i].OnOff"
+                               value="true"
+                               @(isOn ? "checked" : "") />
+                    </div>
+                    <input type="hidden" name="labs[@i].OnOff"   value="false" />
+                    <input type="hidden" name="labs[@i].LabName" value="@Model[i].LabName" />
+                </label>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-dark px-4 py-2 fw-semibold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+    // Update card style live when toggle changes
+    document.querySelectorAll('.form-switch .form-check-input').forEach(function (toggle) {
+        toggle.addEventListener('change', function () {
+            var card = this.closest('.lab-card');
+            var icon = card.querySelector('.stat-icon');
+            var label = card.querySelector('.text-muted.small');
+            var pcIcon = icon.querySelector('i');
+            if (this.checked) {
+                card.classList.replace('lab-off', 'lab-on');
+                icon.classList.replace('stat-icon-red', 'stat-icon-green');
+                pcIcon.classList.replace('bi-pc-display-horizontal', 'bi-pc-display');
+                label.textContent = 'Online';
+            } else {
+                card.classList.replace('lab-on', 'lab-off');
+                icon.classList.replace('stat-icon-green', 'stat-icon-red');
+                pcIcon.classList.replace('bi-pc-display', 'bi-pc-display-horizontal');
+                label.textContent = 'Offline';
+            }
+        });
+    });
+</script>
+}
+
